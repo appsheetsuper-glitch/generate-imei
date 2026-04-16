@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>IMEI Tools</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+
+  <div class="w-full max-w-xl text-center space-y-6">
+
+    <!-- Judul -->
+    <div>
+      <h1 class="text-2xl font-bold">IMEI Generator & Validator</h1>
+      <p class="text-gray-500 text-sm">Tools untuk generate dan validasi IMEI (dummy)</p>
+    </div>
+
+    <!-- Generator -->
+    <div class="bg-white border rounded-xl p-6 shadow-sm">
+      <h2 class="text-lg font-semibold mb-4">Generate IMEI</h2>
+
+      <button onclick="generateIMEI()" 
+        class="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800">
+        Generate
+      </button>
+
+      <p id="result" class="mt-4 text-lg font-mono"></p>
+    </div>
+
+    <!-- Validator -->
+    <div class="bg-white border rounded-xl p-6 shadow-sm">
+      <h2 class="text-lg font-semibold mb-4">Validasi IMEI</h2>
+
+      <input 
+        type="text" 
+        id="imeiInput"
+        placeholder="Masukkan IMEI..."
+        class="w-full border rounded-lg px-3 py-2 mb-4 text-center focus:outline-none focus:ring-2 focus:ring-black"
+      >
+
+      <button onclick="validateIMEI()" 
+        class="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800">
+        Cek Validasi
+      </button>
+
+      <p id="validationResult" class="mt-4 font-medium"></p>
+    </div>
+
+  </div>
+
+  <script>
+    function luhnChecksum(number) {
+      let sum = 0;
+      let shouldDouble = true;
+
+      for (let i = number.length - 1; i >= 0; i--) {
+        let digit = parseInt(number[i]);
+
+        if (shouldDouble) {
+          digit *= 2;
+          if (digit > 9) digit -= 9;
+        }
+
+        sum += digit;
+        shouldDouble = !shouldDouble;
+      }
+
+      return (10 - (sum % 10)) % 10;
+    }
+
+    function generateIMEI() {
+      let imei = '';
+
+      for (let i = 0; i < 14; i++) {
+        imei += Math.floor(Math.random() * 10);
+      }
+
+      let checkDigit = luhnChecksum(imei);
+      imei += checkDigit;
+
+      document.getElementById('result').innerText = imei;
+    }
+
+    function validateIMEI() {
+      let imei = document.getElementById('imeiInput').value.trim();
+      let result = document.getElementById('validationResult');
+
+      if (!/^\d{15}$/.test(imei)) {
+        result.innerText = "❌ IMEI harus 15 digit angka";
+        result.className = "mt-4 font-medium text-red-600";
+        return;
+      }
+
+      let body = imei.slice(0, 14);
+      let checkDigit = parseInt(imei[14]);
+
+      let calculated = luhnChecksum(body);
+
+      if (calculated === checkDigit) {
+        result.innerText = "✅ IMEI valid";
+        result.className = "mt-4 font-medium text-green-600";
+      } else {
+        result.innerText = "❌ IMEI tidak valid";
+        result.className = "mt-4 font-medium text-red-600";
+      }
+    }
+  </script>
+
+</body>
+</html>
